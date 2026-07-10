@@ -1,13 +1,14 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient, TOrder } from '@utils-types';
-import { getOrderByNumberApi } from '../../utils/burger-api';
+import { TIngredient } from '@utils-types';
+import { getOrderByNumber } from '../../services/slices/orderSlice';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
+  const dispatch = useDispatch();
 
   const { ingredients } = useSelector((state) => state.ingredients);
 
@@ -16,21 +17,15 @@ export const OrderInfo: FC = () => {
     return allOrders.find((order) => order.number === Number(number));
   });
 
-  const [fetchedOrder, setFetchedOrder] = useState<TOrder | null>(null);
+  const orderByNumber = useSelector((state) => state.order.orderByNumber);
 
   useEffect(() => {
     if (!orderFromStore && number) {
-      getOrderByNumberApi(Number(number))
-        .then((data) => {
-          if (data.orders && data.orders.length > 0) {
-            setFetchedOrder(data.orders[0]);
-          }
-        })
-        .catch((err) => console.error('Ошибка загрузки заказа:', err));
+      dispatch(getOrderByNumber(Number(number)));
     }
-  }, [orderFromStore, number]);
+  }, [orderFromStore, number, dispatch]);
 
-  const orderData = orderFromStore || fetchedOrder;
+  const orderData = orderFromStore || orderByNumber;
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;

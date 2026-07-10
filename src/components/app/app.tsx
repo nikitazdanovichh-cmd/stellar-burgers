@@ -159,7 +159,14 @@ const AppContent = () => {
           }
         />
         <Route path='/feed/:number' element={<OrderInfo />} />
-        <Route path='/profile/orders/:number' element={<OrderInfo />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
       {background && (
@@ -183,9 +190,11 @@ const AppContent = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title={orderNumberTitle} onClose={closeModal}>
-                <OrderInfo />
-              </Modal>
+              <ProtectedRoute>
+                <Modal title={orderNumberTitle} onClose={closeModal}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
             }
           />
         </Routes>
